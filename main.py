@@ -1,5 +1,5 @@
 #!/usr/bin/python3
- 
+
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.factory import Factory
@@ -19,8 +19,7 @@ WEATHER_API_URL = "http://api.openweathermap.org/data/2.5/"
 class AddLocationForm(ModalView):
     current_weather = ObjectProperty()
     search_input = ObjectProperty()
-    
-    
+
     def __init__(self, **kwargs):
         super(AddLocationForm, self).__init__(**kwargs)
         self.store = JsonStore("weather_store.json", indent=4, sort_keys=True)
@@ -29,9 +28,8 @@ class AddLocationForm(ModalView):
             if 'location_history' in locations:
                 prev_loc = locations['location_history']
                 self.locations_found.data = [{'city': prev_loc[location][0],
-                                                'country': prev_loc[location][1],
-                                                'location_id': prev_loc[location][2]} for location in prev_loc]
-
+                                              'country': prev_loc[location][1],
+                                              'location_id': prev_loc[location][2]} for location in prev_loc]
 
     def search_location(self):
         config = WeatherApp.get_running_app().config
@@ -39,14 +37,13 @@ class AddLocationForm(ModalView):
         search_template = WEATHER_API_URL + "find?q={}&type=like&APPID=" + api_key
         search_url = search_template.format(self.search_input.text)
         request = UrlRequest(search_url, self.found_location)
-        
-        
+
     def found_location(self, request, data):
         cities = [(d['name'], d['sys']['country']) for d in data['list']]
         if len(cities):
             # Kivy 1.10 RecycleView
             self.locations_found.data = [{'city': d['name'], 'country': d['sys']['country'],
-                                            'location_id': d['id']} for d in data['list']]
+                                          'location_id': d['id']} for d in data['list']]
         else:
             print("No match found")
 
@@ -58,8 +55,7 @@ class CurrentWeather(BoxLayout):
     temp = NumericProperty()
     temp_max = NumericProperty()
     temp_min = NumericProperty()
-    
-    
+
     def update_weather(self):
         config = WeatherApp.get_running_app().config
         api_key = config.get("App", "weather_api_key")
@@ -67,8 +63,7 @@ class CurrentWeather(BoxLayout):
         weather_template = WEATHER_API_URL + "weather?q={},{}&units={}&APPID=" + api_key
         weather_url = weather_template.format(self.location[0], self.location[1], temp_type)
         request = UrlRequest(weather_url, self.weather_retrieved)
-    
-    
+
     def weather_retrieved(self, request, data):
         self.conditions = data['weather'][0]['description']
         self.conditions_image = "http://openweathermap.org/img/w/{}.png".format(data['weather'][0]['icon'])
@@ -80,8 +75,7 @@ class CurrentWeather(BoxLayout):
 class Forecast(BoxLayout):
     forecast_container = ObjectProperty()
     location = ListProperty(['New York', 'US'])
-    
-    
+
     def update_weather(self):
         config = WeatherApp.get_running_app().config
         api_key = config.get("App", "weather_api_key")
@@ -89,8 +83,7 @@ class Forecast(BoxLayout):
         weather_template = WEATHER_API_URL + "forecast/daily?q={},{}&cnt=3&units={}&APPID=" + api_key
         weather_url = weather_template.format(self.location[0], self.location[1], temp_type)
         request = UrlRequest(weather_url, self.weather_retrieved)
-        
-        
+
     def weather_retrieved(self, request, data):
         self.forecast_container.clear_widgets()
         for day in data['list']:
@@ -107,10 +100,9 @@ class WeatherApp(App):
     def build_config(self, config):
         config.setdefaults('App', {"save_search_history": 1,
                                    "search_history_file_path": os.path.join(os.getcwd(),
-                                                                      'weather_store.json'),
-                                                                       "weather_api_key": "0"})
+                                   "weather_store.json"),
+                                   "weather_api_key": "0"})
         config.setdefaults('Weather', {"temp_type": "Metric"})
-
 
     def build_settings(self, settings):
         settings.add_json_panel("App Settings", self.config,
@@ -137,7 +129,6 @@ class WeatherApp(App):
                                           "options": ["Metric", "Imperial"]
                                          }]""")
 
-
     def on_config_change(self, config, section, key, value):
         if config is self.config and key == "temp_type":
             try:
@@ -153,10 +144,9 @@ class WeatherRoot(BoxLayout):
     forecast = ObjectProperty
     locations = ObjectProperty
 
-
     def __init__(self, **kwargs):
         super(WeatherRoot, self).__init__(**kwargs)
-        
+
         config = WeatherApp.get_running_app().config
         if len(config.get("App", "weather_api_key")) <= 0:
             print("No API key provided")
@@ -165,18 +155,16 @@ class WeatherRoot(BoxLayout):
         if self.store.exists("locations"):
             locations = self.store.get('locations')
             if 'current_location' in locations:
-                current_location = tuple(locations['current_location']) # List in JSON
+                current_location = tuple(locations['current_location'])  # List in JSON
                 self.show_current_weather(current_location)
             else:
                 Clock.schedule_once(lambda dt: self.show_add_location_form())
         else:
             Clock.schedule_once(lambda dt: self.show_add_location_form())
 
-
     def show_add_location_form(self):
         self.add_location_form = AddLocationForm()
         self.add_location_form.open()
-
 
     def show_current_weather(self, location=None):
         config = WeatherApp.get_running_app().config
@@ -191,11 +179,10 @@ class WeatherRoot(BoxLayout):
                 location_history[str(location[2])] = location
             self.store.put('locations', location_history=location_history,
                            current_location=location)
-            
-            
+
         self.current_weather.location = location
         self.current_weather.update_weather()
-        
+
         self.forecast.location = location
         self.forecast.update_weather()
 
