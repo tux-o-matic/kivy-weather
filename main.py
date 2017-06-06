@@ -100,7 +100,7 @@ class WeatherApp(App):
     def build_config(self, config):
         config.setdefaults('App', {"save_search_history": 1,
                                    "search_history_file_path": os.path.join(os.getcwd(),
-                                   "weather_store.json"),
+                                                                            "weather_store.json"),
                                    "weather_api_key": "0"})
         config.setdefaults('Weather', {"temp_type": "Metric"})
 
