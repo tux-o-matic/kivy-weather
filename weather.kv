@@ -1,0 +1,137 @@
+#: import main main
+
+WeatherRoot:
+
+<WeatherRoot>:
+	carousel: carousel
+	current_weather: current_weather
+	forecast: forecast
+	Carousel:
+		id: carousel
+		CurrentWeather:
+			id: current_weather
+		Forecast:
+			id: forecast
+
+<AddLocationForm>:
+	orientation: "vertical"
+	locations_found: locations_found
+	search_input: search_box
+	BoxLayout:
+		orientation: "vertical"
+		BoxLayout:
+			height: "40dp"
+			size_hint_y: None
+			TextInput:
+				focus: True
+				id: search_box
+				multiline: False
+				on_text_validate: root.search_location()
+				size_hint_x: 75
+			Button:
+				text: "Search"
+				size_hint_x: 25
+				on_press: root.search_location()
+		RecycleView:
+	        id: locations_found
+	        viewclass: "LocationButton"
+	        RecycleBoxLayout:
+	            default_size: None, dp(40)
+	            default_size_hint: 1, None
+	            size_hint_y: None
+	            height: self.minimum_height
+	            orientation: 'vertical'
+	            spacing: "2dp"
+		Button:
+			height: "40dp"
+			on_press: root.dismiss()
+			size_hint_y: None
+			text: "Cancel"
+
+
+<LocationButton@BoxLayout>:
+	city: ''
+	country: ''
+	Button:
+		text: "{} ({})".format(root.city, root.country)
+		on_press: app.root.show_current_weather((root.city, root.country, root.location_id))
+
+
+<CurrentWeather>:
+	orientation: "vertical"
+	BoxLayout:
+		Label:
+			font_size: "30dp"
+			text: "{} ({})".format(root.location[0], root.location[1])
+		Label:
+			font_size: "30dp"
+			text: "{}".format(root.temp)
+	BoxLayout:
+		orientation: "horizontal"
+		Label:
+			text: root.conditions
+		AsyncImage:
+			source: root.conditions_image
+	BoxLayout:
+		orientation: "horizontal"
+		Label:
+			text: "Low: {}".format(root.temp_min)
+		Label:
+			text: "High: {}".format(root.temp_max)
+	BoxLayout:
+		orientation: "horizontal"
+		size_hint_y: None
+		height: "40dp"
+		Button:
+			text: "Locations"
+			on_press: app.root.show_add_location_form()
+		Button: 
+			text: "Forecast"
+			on_press: app.root.carousel.load_slide(app.root.forecast)
+
+
+<ForecastLabel@BoxLayout>:
+	date: ""
+	conditions: ""
+	conditions_image: ""
+	temp_max: None
+	temp_min: None
+	canvas.before:
+		Color:
+			rgb: [0.2, 0.2, 0.2]
+		Line:
+			points: [self.pos[0], self.pos[1], self.width, self.pos[1]]
+	Label:
+		text: root.date
+	BoxLayout:
+		orientation: "vertical"
+		AsyncImage:
+			source: root.conditions_image
+		Label:
+			text: root.conditions
+		BoxLayout:
+			orientation: "vertical"
+			Label:
+				text: "Low {}".format(root.temp_min)
+			Label:
+				text: "High {}".format(root.temp_max)
+
+
+<Forecast>:
+	forecast_container: forecast_container
+	orientation: "vertical"
+	Label:
+		size_hint_y: 0.1
+		font_size: "30dp"
+		text: "{} ({})".format(root.location[0], root.location[1])
+	BoxLayout:
+		orientation: "vertical"
+		id: forecast_container
+	BoxLayout:
+		orientation: "horizontal"
+		size_hint_y: None
+		height: "40dp"
+		Button:
+			text: "Current"
+			on_press: app.root.show_current_weather(root.location)
+	
